@@ -2,12 +2,15 @@
  * Created by hao.cheng on 2017/4/16.
  */
 import axios from 'axios';
-import { get, post } from './tools';
+import { get, post, del } from './tools';
 import * as config from './config';
 
 export const getBbcNews = () => get({ url: config.NEWS_BBC });
 export const getUserInfo = () => get({ url: config.USER.USER_INFO });
 export const updateUserInfo = (data: any) => post({ url: config.USER.UPDATE, data });
+export const deleteUser = (data: string[]) => del({ url: config.USER.DELETE, data });
+
+export const getCarInfo = (_id: string) => get({ url: config.CAR.INFO, msg: '接口异常', config: {data: {id: _id}}});
 
 export const npmDependencies = () =>
     axios

@@ -23,6 +23,13 @@ export const NEWS_BBC =
 export const USER = {
     USER_INFO: PREFIX + '/user/getinfo',
     UPDATE: PREFIX + '/user/update',
+    DELETE: PREFIX + '/user/delete',
+}
+
+export const CAR = {
+    INFO: PREFIX + '/car/get',
+    UPDATE: PREFIX + '/car/update',
+    DELETE: PREFIX + '/car/delete',
 }
 
 export const BMAP = {

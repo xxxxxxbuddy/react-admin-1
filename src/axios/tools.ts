@@ -41,3 +41,13 @@ export const post = ({ url, data, msg = '接口异常', config }: IFRequestParam
             console.log(err);
             message.warn(msg);
         });
+
+
+export const del = ({ url, data, msg = '接口异常' }: IFRequestParam) =>
+    axios
+        .delete(url, {data: data})
+        .then(res => res.data)
+        .catch(err => {
+            console.log(err);
+            message.warn(msg);
+});

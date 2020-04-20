@@ -1,8 +1,8 @@
 import React from "react";
 import BreadcrumbCustom from "../BreadcrumbCustom";
-import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon } from "antd";
+import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon, Modal } from "antd";
 import { TableRowSelection } from "antd/lib/table";
-import { getUserInfo, updateUserInfo } from "../../axios";
+import { getUserInfo, updateUserInfo, deleteUser, getCarInfo } from "../../axios";
 import Highlighter from 'react-highlight-words';
 
 export interface UserManagementProps {
@@ -121,8 +121,8 @@ class UserManagement extends React.Component<UserManagementProps, UserManagement
         title: '车辆信息',
         dataIndex: 'car_info',
         width: 100,
-        render: () => (
-          <a href=''>
+        render: (text: any, record: any) => (
+          <a onClick={() => this.showCarInfo(record._id)}>
             点此查看
           </a>
         ),
@@ -181,6 +181,8 @@ class UserManagement extends React.Component<UserManagementProps, UserManagement
     editingKey: '',
     searchText: '',
     searchedColumn: '',
+    showModal: false,
+    modalData: '',
   };
   componentDidMount() {
     this.start();
@@ -201,6 +203,40 @@ class UserManagement extends React.Component<UserManagementProps, UserManagement
       this.setState({ loading: false });
     });
   };
+
+  delete = async() => {
+    const data: string[] = this.state.selectedRowKeys;
+    await deleteUser(data).then(async ({code}: {code: number}) => {
+      if (code == 1) {
+        this.setState({ selectedRowKeys: [] });
+        await this.start();
+        message.success('删除成功');
+      } else {
+        message.error('删除失败');
+      }
+    }).catch(e => {
+      message.error('删除失败,' + e.message);
+    });
+  }
+
+  showCarInfo(_id: string) {
+    let info = null;
+    getCarInfo(_id).then(res => {
+      if (res.code == 1) {
+        info = res.data;
+
+        if (info) {
+          this.setState({ showModal: true, modalData: info });
+        } else {
+          message.info('该用户无车辆信息');
+        }
+      } else {
+        message.error('获取车辆信息失败');
+      }
+    }).catch(e => {
+      message.error('获取车辆信息失败' + e.message);
+    });
+  }
 
   onSelectChange = (selectedRowKeys: string[]) => {
     console.log('selectedRowKeys changed: ', selectedRowKeys);
@@ -352,20 +388,29 @@ class UserManagement extends React.Component<UserManagementProps, UserManagement
           <Col className="gutter-row" md={24}>
             <div className="gutter-box">
               <Card title="用户信息" bordered={false}>
-                <div style={{ marginBottom: 16 }}>
+                <div style={{ marginBottom: 16, position: "relative" }}>
                   <Button
                     type="primary"
                     onClick={this.start}
                     disabled={loading}
                     loading={loading}
                   >
-                    Reload
-                                    </Button>
+                    刷新数据
+                  </Button>
                   <span style={{ marginLeft: 8 }}>
                     {hasSelected
                       ? `Selected ${selectedRowKeys.length} items`
                       : ''}
                   </span>
+                  <Button
+                    type="danger"
+                    onClick={this.delete}
+                    disabled={loading || selectedRowKeys.length === 0}
+                    loading={loading}
+                    style={{float: "right", marginRight: "40px"}}
+                  >
+                    删除选中
+                  </Button>
                 </div>
                 <Table
                   components={components}
@@ -373,10 +418,20 @@ class UserManagement extends React.Component<UserManagementProps, UserManagement
                   rowSelection={rowSelection as TableRowSelection<any>}
                   columns={columns}
                   dataSource={data}
-                  rowKey={data => data.id}
+                  rowKey={data => data._id}
                   rowClassName={(record: any, index: number) => 'editable-row'}
                   pagination={{pageSize}}
                 />
+                <Modal
+                  footer={null}
+                  width={'60vw'}
+                  visible={this.state.showModal}
+                >
+                  <Card>
+                    test
+                    {this.state.modalData}
+                  </Card>
+                </Modal>
                 {/* <Pagination pageSize={20} /> */}
               </Card>
             </div>
