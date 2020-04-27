@@ -32,6 +32,24 @@ export const CAR = {
     DELETE: PREFIX + '/car/delete',
 }
 
+export const CARPORT = {
+    INFO: PREFIX + '/carport/get',
+    UPDATE: PREFIX + '/carport/update',
+    PARKINGLOT_STATE: PREFIX + '/carport/parkinglot_state',
+}
+
+export const PARKINGLOT = {
+    INFO: PREFIX + '/parkinglot/get',
+    UPDATE: PREFIX + '/carport/parkinglot',
+}
+
+export const TENANT = {
+    INFO: PREFIX + '/tenant/get',
+    UPDATE: PREFIX + '/tenant/update',
+}
+
+export const LOGIN = PREFIX + '/login';
+
 export const BMAP = {
-    GET_PARKING: `/map/place/v2/search?query=停车场&tag=交通设施&location=22.517937,113.932428&radius=2000&output=json&ak=${ak}`,
+    GET_PARKING: `/map/place/v2/search?query=停车场&tag=交通设施&location=22.517937,113.932428&radius=5000&output=json&ak=${ak}`,
 }

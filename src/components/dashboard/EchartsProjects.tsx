@@ -8,16 +8,16 @@ let xAxisData = [];
 let data = [];
 for (let i = 0; i < 50; i++) {
     xAxisData.push(i);
-    data.push(Math.ceil((Math.cos(i / 5) * (i / 5) + i / 6) * 5) + 10);
+    data.push(Math.random() * 20000 + 1000);
 }
 
 const option = {
     title: {
-        text: '最近50天每天项目完成情况',
+        text: '最近50天订单数',
         left: 'center',
         textStyle: {
             color: '#ccc',
-            fontSize: 10
+            fontSize: 14
         }
     },
     backgroundColor: '#08263a',
@@ -85,7 +85,7 @@ const option = {
             }
         }
     }, {
-        name: '完成项目数',
+        name: '订单数',
         type: 'bar',
         data: data,
         xAxisIndex: 1,

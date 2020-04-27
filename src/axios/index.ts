@@ -1,6 +1,3 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
 import axios from 'axios';
 import { get, post, del } from './tools';
 import * as config from './config';
@@ -10,8 +7,20 @@ export const getUserInfo = () => get({ url: config.USER.USER_INFO });
 export const updateUserInfo = (data: any) => post({ url: config.USER.UPDATE, data });
 export const deleteUser = (data: string[]) => del({ url: config.USER.DELETE, data });
 
-export const getCarInfo = (_id: string) => get({ url: config.CAR.INFO, msg: '接口异常', config: {data: {id: _id}}});
+export const getCarInfo = (id: string) => get({ url: config.CAR.INFO, msg: '接口异常', config: {params: {user_id: id}}});
 
+
+export const getCarportInfo = () => get({ url: config.CARPORT.INFO });
+export const updateCarportInfo = (data: any) => post({ url: config.CARPORT.UPDATE, data });
+
+export const getParkinglotInfo = () => get({ url: config.PARKINGLOT.INFO });
+export const updateParkinglotInfo = (data: any) => post({ url: config.PARKINGLOT.UPDATE, data });
+export const getParkinglotState = () => get({ url: config.CARPORT.PARKINGLOT_STATE });
+
+export const getTenantInfo = () => get({ url: config.TENANT.INFO });
+export const updateTenantInfo = (data: any) => post({ url: config.TENANT.UPDATE, data });
+
+export const login = (data: any) => post({ url: config.LOGIN, data});
 export const npmDependencies = () =>
     axios
         .get('./npm.json')
@@ -47,7 +56,7 @@ export const gitOauthInfo = (access_token: string) =>
 // 管理员权限获取
 export const admin = () => get({ url: config.MOCK_AUTH_ADMIN });
 // 访问权限获取
-export const guest = () => get({ url: config.MOCK_AUTH_VISITOR });
+export const tenant = () => get({ url: config.MOCK_AUTH_VISITOR });
 /** 获取服务端菜单 */
 export const fetchMenu = () => new Promise(resolve => {}); // get({ url: config.MOCK_MENU });
 

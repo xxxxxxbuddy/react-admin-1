@@ -30,8 +30,8 @@ class ExampleAnimations extends React.Component<ExampleAnimationsProps, ExampleA
                 dataIndex: 'address',
             },
             {
-                title: 'operation',
-                dataIndex: 'operation',
+                title: '操作',
+                dataIndex: '操作',
                 render: (text: any, record: any, index: number) => {
                     return this.state.dataSource.length > 1 ? (
                         <Popconfirm

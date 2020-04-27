@@ -85,7 +85,7 @@ class S extends Component {
                 console.log('OK');
             },
             onCancel() {
-                console.log('Cancel');
+                console.log('取消');
             },
         });
     };

@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 import React from 'react';
 import { Table, Button, Row, Col, Card } from 'antd';
 import { getBbcNews } from '../../axios';
@@ -78,7 +76,7 @@ class AsynchronousTable extends React.Component {
                                         disabled={loading}
                                         loading={loading}
                                     >
-                                        Reload
+                                        刷新
                                     </Button>
                                     <span style={{ marginLeft: 8 }}>
                                         {hasSelected

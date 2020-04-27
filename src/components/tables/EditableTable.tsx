@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 
 import React from 'react';
 import { Table, Input, InputNumber, Popconfirm, Form, Button } from 'antd';
@@ -103,8 +101,8 @@ export default class EditableTable extends React.Component<EditableTableProps, E
                 editable: true,
             },
             {
-                title: 'operation',
-                dataIndex: 'operation',
+                title: '操作',
+                dataIndex: '操作',
                 render: (text: any, record: any) => {
                     const editable = this.isEditing(record);
                     return (
@@ -117,19 +115,21 @@ export default class EditableTable extends React.Component<EditableTableProps, E
                                                 onClick={() => this.save(form, record.key)}
                                                 style={{ marginRight: 8 }}
                                             >
-                                                Save
+                                                保存
                                             </Button>
                                         )}
                                     </EditableContext.Consumer>
                                     <Popconfirm
-                                        title="Sure to cancel?"
+                                        cancelText="取消"
+                                okText="确认"
+                                title="确认取消吗？"
                                         onConfirm={() => this.cancel()}
                                     >
-                                        <Button>Cancel</Button>
+                                        <Button>取消</Button>
                                     </Popconfirm>
                                 </span>
                             ) : (
-                                <Button onClick={() => this.edit(record.key)}>Edit</Button>
+                                <Button onClick={() => this.edit(record.key)}>编辑</Button>
                             )}
                         </div>
                     );

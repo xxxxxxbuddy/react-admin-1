@@ -1,6 +1,4 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 import React from 'react';
 import { Table } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
@@ -18,7 +16,7 @@ const columns: ColumnProps<any>[] = [
     { title: 'Column 8', dataIndex: 'address', key: '8' },
     {
         title: 'Action',
-        key: 'operation',
+        key: '操作',
         fixed: 'right',
         width: 100,
         render: () => <span>action</span>,

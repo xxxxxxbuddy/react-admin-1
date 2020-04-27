@@ -1,13 +1,12 @@
-/**
- * Created by hao.cheng on 2017/4/16.
- */
+
 import React from 'react';
-import { Form, Icon, Input, Button, Checkbox } from 'antd';
+import { Form, Icon, Input, Button, Checkbox, message } from 'antd';
 import { PwaInstaller } from '../widget';
 import { connectAlita } from 'redux-alita';
 import { RouteComponentProps } from 'react-router';
 import { FormProps } from 'antd/lib/form';
 import umbrella from 'umbrella-storage';
+import { login } from '../../axios';
 
 const FormItem = Form.Item;
 type LoginProps = {
@@ -34,26 +33,38 @@ class Login extends React.Component<LoginProps> {
         e.preventDefault();
         this.props.form!.validateFields((err, values) => {
             if (!err) {
-                console.log('Received values of form: ', values);
                 const { setAlitaState } = this.props;
-                if (values.userName === 'admin' && values.password === 'admin')
-                    setAlitaState({ funcName: 'admin', stateName: 'auth' });
-                if (values.userName === 'guest' && values.password === 'guest')
-                    setAlitaState({ funcName: 'guest', stateName: 'auth' });
+                login({account: values.userName, password: values.password}).then(res => {
+                    if (res.code == 1) {
+                        let rule = '';
+                        if (res.data == 0) {
+                            rule = 'admin';
+                        } else {
+                            rule = 'tenant';
+                        }
+                        setAlitaState({ funcName: rule, stateName: 'auth' });
+                        message.success('登录成功');
+                        umbrella.setLocalStorage('user', values.userName);
+                    } else {
+                        message.error('登录失败');
+                        console.error(res.errMsg);
+                    }
+                }, e => {
+                    message.error('登录失败');
+                }).catch(e => {
+                    message.error('登录失败');
+                });
             }
         });
     };
-    gitHub = () => {
-        window.location.href =
-            'https://github.com/login/oauth/authorize?client_id=792cdcd244e98dcd2dee&redirect_uri=http://localhost:3006/&scope=user&state=reactAdmin';
-    };
+
     render() {
         const { getFieldDecorator } = this.props.form!;
         return (
             <div className="login">
                 <div className="login-form">
                     <div className="login-logo">
-                        <span>React Admin</span>
+                        <span>共享停车位信息管理系统</span>
                         <PwaInstaller />
                     </div>
                     <Form onSubmit={this.handleSubmit} style={{ maxWidth: '300px' }}>
@@ -63,7 +74,7 @@ class Login extends React.Component<LoginProps> {
                             })(
                                 <Input
                                     prefix={<Icon type="user" style={{ fontSize: 13 }} />}
-                                    placeholder="管理员输入admin, 游客输入guest"
+                                    placeholder="账号"
                                 />
                             )}
                         </FormItem>
@@ -74,7 +85,7 @@ class Login extends React.Component<LoginProps> {
                                 <Input
                                     prefix={<Icon type="lock" style={{ fontSize: 13 }} />}
                                     type="password"
-                                    placeholder="管理员输入admin, 游客输入guest"
+                                    placeholder="密码"
                                 />
                             )}
                         </FormItem>
@@ -94,13 +105,6 @@ class Login extends React.Component<LoginProps> {
                             >
                                 登录
                             </Button>
-                            <p style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>或 现在就去注册!</span>
-                                <span onClick={this.gitHub}>
-                                    <Icon type="github" />
-                                    (第三方登录)
-                                </span>
-                            </p>
                         </FormItem>
                     </Form>
                 </div>

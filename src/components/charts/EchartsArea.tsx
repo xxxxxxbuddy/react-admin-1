@@ -5,16 +5,16 @@ import React from 'react';
 import ReactEcharts from 'echarts-for-react';
 import echarts from 'echarts';
 
-let base = +new Date(1968, 9, 3);
+let base = +new Date(2020, 1, 1);
 let oneDay = 24 * 3600 * 1000;
 let date = [];
 
 let data = [Math.random() * 300];
 
-for (var i = 1; i < 20000; i++) {
+for (var i = 1; i < 150; i++) {
     var now = new Date((base += oneDay));
     date.push([now.getFullYear(), now.getMonth() + 1, now.getDate()].join('/'));
-    data.push(Math.round((Math.random() - 0.5) * 20 + data[i - 1]));
+    data.push(Math.round((Math.random()) * 20 + data[i - 1]));
 }
 
 const option = {
@@ -26,7 +26,7 @@ const option = {
     },
     title: {
         left: 'center',
-        text: '大数据量面积图',
+        text: '订单量',
     },
     toolbox: {
         feature: {

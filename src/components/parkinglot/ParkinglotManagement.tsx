@@ -2,7 +2,7 @@ import React from "react";
 import BreadcrumbCustom from "../BreadcrumbCustom";
 import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon } from "antd";
 import { TableRowSelection } from "antd/lib/table";
-import { getUserInfo, updateUserInfo } from "../../axios";
+import { updateUserInfo, getParkinglotInfo } from "../../axios";
 import Highlighter from 'react-highlight-words';
 
 const FormItem = Form.Item;
@@ -66,73 +66,45 @@ class EditableCell extends React.Component<EditableCellProps> {
   }
 }
 
-class TanentManagement extends React.Component {
+class ParkinglotManagement extends React.Component {
   constructor(props: any) {
     super(props);
     this.columns = [
       {
-          title: '姓名',
-          dataIndex: 'name',
-          // width: 80,
+          title: '车位编号',
+          dataIndex: 'Parkinglot_number',
           editable: true,
-          ...this.getColumnSearchProps('name'),
-          // render: (text: any, record: any) => (
-          //     <a href={record.url} target="_blank" rel="noopener noreferrer">
-          //         {text}
-          //     </a>
-          // ),
+          ...this.getColumnSearchProps('Parkinglot_number'),
       },
       {
-        title: '性别',
-        dataIndex: 'sex',
+        title: '车位类型',
+        dataIndex: 'Parkinglot_type',
         // width: 80,
         editable: true,
-        ...this.getColumnSearchProps('sex'),
+        ...this.getColumnSearchProps('Parkinglot_type'),
       },
       {
-          title: '身份证号',
-          dataIndex: 'id',
-          ...this.getColumnSearchProps('id'),
+          title: '占用状态',
+          dataIndex: 'occupancy_state',
+          ...this.getColumnSearchProps('occupancy_state'),
           // width: 200,
       },
       {
-          title: '手机号码',
-          dataIndex: 'phone',
+          title: '停车场ID',
+          dataIndex: 'parking_lot_id',
           // width: 100,
           editable: true,
-          ...this.getColumnSearchProps('phone'),
+          render: (text: any, record: any) => (
+            <a onClick={() => this.showParkingLotInfo(record._id)}>
+              {record._id}
+            </a>
+          ),
+          ...this.getColumnSearchProps('parking_lot_id'),
       },
       {
-        title: '信用等级',
-        dataIndex: 'credit_rating',
-        ...this.getColumnSearchProps('credit_rating'),
-        // width: 80,
-        editable: true,
-      },
-      {
-        title: '车辆信息',
-        dataIndex: 'car_info',
-        width: 100,
-        render: () => (
-          <a href=''>
-            点此查看
-          </a>
-        ),
-      },
-      {
-        title: '订单信息',
-        dataIndex: 'order',
-        width: 100,
-        render: () => (
-          <a href=''>
-            点此查看
-          </a>
-        )
-      },
-      {
-        title: 'operation',
+        title: '操作',
         width: 200,
-        dataIndex: 'operation',
+        dataIndex: '操作',
         render: (text: any, record: any) => {
             const editable = this.isEditing(record);
             return (
@@ -142,22 +114,24 @@ class TanentManagement extends React.Component {
                             <EditableContext.Consumer>
                                 {(form: any) => (
                                     <Button
-                                        onClick={() => this.save(form, record.id)}
+                                        onClick={() => this.save(form, record._id)}
                                         style={{ marginRight: 8 }}
                                     >
-                                        Save
+                                        保存
                                     </Button>
                                 )}
                             </EditableContext.Consumer>
                             <Popconfirm
-                                title="Sure to cancel?"
+                                cancelText="取消"
+                                okText="确认"
+                                title="确认取消吗？"
                                 onConfirm={() => this.cancel()}
                             >
-                                <Button>Cancel</Button>
+                                <Button>取消</Button>
                             </Popconfirm>
                         </span>
                     ) : (
-                        <Button onClick={() => this.edit(record.id)}>Edit</Button>
+                        <Button onClick={() => this.edit(record._id)}>编辑</Button>
                     )}
                 </div>
             );
@@ -183,7 +157,7 @@ class TanentManagement extends React.Component {
 
   start = async () => {
     this.setState({ loading: true });
-    await getUserInfo().then(({ code, data }: { code: number, data: any[] }) => {
+    await getParkinglotInfo().then(({ code, data }: { code: number, data: any[] }) => {
       data.forEach(record => record.sex = record.sex === 0 ? '男' : '女');
       this.setState({
         data,
@@ -200,7 +174,7 @@ class TanentManagement extends React.Component {
   };
 
   isEditing = (record: any) => {
-    return record.id === this.state.editingKey;
+    return record._id === this.state.editingKey;
   };
   edit(key: string) {
       this.setState({ editingKey: key });
@@ -211,17 +185,13 @@ class TanentManagement extends React.Component {
               return;
           }
           const newData: any[] = [...this.state.data];
-          const index = newData.findIndex((item: any) => id === item.id);
+          const index = newData.findIndex((item: any) => id === item._id);
           if (index > -1) {
               const item = newData[index];
-              const data = {id: item.id, ...row};
-              if (data.sex === '男') {
-                data.sex = 0;
-              } else {
-                data.sex = 1;
-              }
+              const data = {_id: item._id, ...row};
+
               updateUserInfo({info: [data]}).then(res => {
-                if (res.code === 1) {
+                if (res && res.code === 1) {
                   newData.splice(index, 1, {
                     ...item,
                     ...row,
@@ -240,6 +210,10 @@ class TanentManagement extends React.Component {
   cancel = () => {
       this.setState({ editingKey: '' });
   };
+
+  showParkingLotInfo(id: string) {
+
+  }
 
   getColumnSearchProps = (dataIndex: string) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
@@ -339,11 +313,11 @@ class TanentManagement extends React.Component {
   const pageSize = 20;
     return (
       <div className="gutter-example">
-        <BreadcrumbCustom first="用户信息管理" />
+        <BreadcrumbCustom first="停车场信息管理" />
         <Row gutter={16}>
           <Col className="gutter-row" md={24}>
             <div className="gutter-box">
-              <Card title="用户信息" bordered={false}>
+              <Card title="停车场信息" bordered={false}>
                 <div style={{ marginBottom: 16 }}>
                   <Button
                     type="primary"
@@ -351,7 +325,7 @@ class TanentManagement extends React.Component {
                     disabled={loading}
                     loading={loading}
                   >
-                    Reload
+                    刷新
                                     </Button>
                   <span style={{ marginLeft: 8 }}>
                     {hasSelected
@@ -365,7 +339,7 @@ class TanentManagement extends React.Component {
                   rowSelection={rowSelection as TableRowSelection<any>}
                   columns={columns}
                   dataSource={data}
-                  rowKey={data => data.id}
+                  rowKey={data => data._id}
                   rowClassName={(record: any, index: number) => 'editable-row'}
                   pagination={{pageSize}}
                 />
@@ -379,4 +353,4 @@ class TanentManagement extends React.Component {
   }
 }
 
-export default TanentManagement;
+export default ParkinglotManagement;

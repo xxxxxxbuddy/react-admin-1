@@ -2,7 +2,7 @@ import React from "react";
 import BreadcrumbCustom from "../BreadcrumbCustom";
 import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon } from "antd";
 import { TableRowSelection } from "antd/lib/table";
-import { getUserInfo, updateUserInfo } from "../../axios";
+import { getCarportInfo, updateCarportInfo, getParkinglotInfo } from "../../axios";
 import Highlighter from 'react-highlight-words';
 
 const FormItem = Form.Item;
@@ -27,6 +27,19 @@ type EditableCellProps = {
   record: any;
   index: number;
 };
+
+enum CarportType {
+  MINI = 0,
+  SMALL = 1,
+  MEDIUM = 2,
+  BIG = 3,
+}
+
+enum OccupancyStateType {
+  LEISURE = 0,
+  OCCUPIED = 1,
+  DISABLED = 2,
+}
 
 class EditableCell extends React.Component<EditableCellProps> {
   getInput = () => {
@@ -71,68 +84,40 @@ class CarportManagement extends React.Component {
     super(props);
     this.columns = [
       {
-          title: '姓名',
-          dataIndex: 'name',
-          // width: 80,
+          title: '车位编号',
+          dataIndex: 'carport_number',
           editable: true,
-          ...this.getColumnSearchProps('name'),
-          // render: (text: any, record: any) => (
-          //     <a href={record.url} target="_blank" rel="noopener noreferrer">
-          //         {text}
-          //     </a>
-          // ),
+          ...this.getColumnSearchProps('carport_number'),
       },
       {
-        title: '性别',
-        dataIndex: 'sex',
+        title: '车位类型',
+        dataIndex: 'carport_type',
         // width: 80,
         editable: true,
-        ...this.getColumnSearchProps('sex'),
+        ...this.getColumnSearchProps('carport_type'),
       },
       {
-          title: '身份证号',
-          dataIndex: 'id',
-          ...this.getColumnSearchProps('id'),
+          title: '占用状态',
+          dataIndex: 'occupancy_state',
+          ...this.getColumnSearchProps('occupancy_state'),
           // width: 200,
       },
       {
-          title: '手机号码',
-          dataIndex: 'phone',
+          title: '停车场',
+          dataIndex: 'parkinglot_id',
           // width: 100,
-          editable: true,
-          ...this.getColumnSearchProps('phone'),
+          render: (text: any, record: any) => {
+            console.log(text, record);
+            
+            return this.state.parkinglot.length > 0 ?
+              (<span>{(this.state.parkinglot as any[]).find((n: any) => n._id == text)!.name}</span>) :
+              text;
+          },
       },
       {
-        title: '信用等级',
-        dataIndex: 'credit_rating',
-        ...this.getColumnSearchProps('credit_rating'),
-        // width: 80,
-        editable: true,
-      },
-      {
-        title: '车辆信息',
-        dataIndex: 'car_info',
-        width: 100,
-        render: () => (
-          <a href=''>
-            点此查看
-          </a>
-        ),
-      },
-      {
-        title: '订单信息',
-        dataIndex: 'order',
-        width: 100,
-        render: () => (
-          <a href=''>
-            点此查看
-          </a>
-        )
-      },
-      {
-        title: 'operation',
+        title: '操作',
         width: 200,
-        dataIndex: 'operation',
+        dataIndex: '操作',
         render: (text: any, record: any) => {
             const editable = this.isEditing(record);
             return (
@@ -142,22 +127,24 @@ class CarportManagement extends React.Component {
                             <EditableContext.Consumer>
                                 {(form: any) => (
                                     <Button
-                                        onClick={() => this.save(form, record.id)}
+                                        onClick={() => this.save(form, record._id)}
                                         style={{ marginRight: 8 }}
                                     >
-                                        Save
+                                        保存
                                     </Button>
                                 )}
                             </EditableContext.Consumer>
                             <Popconfirm
-                                title="Sure to cancel?"
+                                cancelText="取消"
+                                okText="确认"
+                                title="确认取消吗？"
                                 onConfirm={() => this.cancel()}
                             >
-                                <Button>Cancel</Button>
+                                <Button>取消</Button>
                             </Popconfirm>
                         </span>
                     ) : (
-                        <Button onClick={() => this.edit(record.id)}>Edit</Button>
+                        <Button onClick={() => this.edit(record._id)}>编辑</Button>
                     )}
                 </div>
             );
@@ -170,6 +157,7 @@ class CarportManagement extends React.Component {
     selectedRowKeys: [], // Check here to configure the default column
     loading: false,
     data: [],
+    parkinglot: [],
     editingKey: '',
     searchText: '',
     searchedColumn: '',
@@ -183,10 +171,16 @@ class CarportManagement extends React.Component {
 
   start = async () => {
     this.setState({ loading: true });
-    await getUserInfo().then(({ code, data }: { code: number, data: any[] }) => {
-      data.forEach(record => record.sex = record.sex === 0 ? '男' : '女');
+    await getCarportInfo().then(({ code, data }: { code: number, data: any[] }) => {
       this.setState({
         data,
+      });
+    }).catch(e => {
+      this.setState({ loading: false });
+    });
+    await getParkinglotInfo().then(({ code, data }: { code: number, data: any[] }) => {
+      this.setState({
+        parkinglot: data,
         loading: false,
       });
     }).catch(e => {
@@ -200,7 +194,7 @@ class CarportManagement extends React.Component {
   };
 
   isEditing = (record: any) => {
-    return record.id === this.state.editingKey;
+    return record._id === this.state.editingKey;
   };
   edit(key: string) {
       this.setState({ editingKey: key });
@@ -211,16 +205,11 @@ class CarportManagement extends React.Component {
               return;
           }
           const newData: any[] = [...this.state.data];
-          const index = newData.findIndex((item: any) => id === item.id);
+          const index = newData.findIndex((item: any) => id === item._id);
           if (index > -1) {
               const item = newData[index];
-              const data = {id: item.id, ...row};
-              if (data.sex === '男') {
-                data.sex = 0;
-              } else {
-                data.sex = 1;
-              }
-              updateUserInfo({info: [data]}).then(res => {
+              const data = {_id: item._id, ...row};
+              updateCarportInfo({info: [data]}).then(res => {
                 if (res.code === 1) {
                   newData.splice(index, 1, {
                     ...item,
@@ -229,6 +218,7 @@ class CarportManagement extends React.Component {
                   message.success('更新成功');
                   this.setState({ data: newData, editingKey: '' });
                 }
+                this.start();
               }).catch(e => {
                 console.log(e);
                 message.error('更新失败');
@@ -240,6 +230,10 @@ class CarportManagement extends React.Component {
   cancel = () => {
       this.setState({ editingKey: '' });
   };
+
+  showParkingLotInfo(id: string) {
+
+  }
 
   getColumnSearchProps = (dataIndex: string) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
@@ -281,8 +275,22 @@ class CarportManagement extends React.Component {
         setTimeout(() => this.searchInput!.select());
       }
     },
-    render: (text: any) =>
-      this.state.searchedColumn === dataIndex ? (
+    render: (text: any) =>  {
+      if (dataIndex === 'carport_type') {
+          switch (text) {
+            case CarportType.MINI: text = '微型车位'; break;
+            case CarportType.SMALL: text = '小型车位'; break;
+            case CarportType.MEDIUM: text = '中型车位'; break;
+            case CarportType.BIG: text = '大型车位'; break;
+          }
+      } else if (dataIndex === 'occupancy_state') {
+        switch(text) {
+          case OccupancyStateType.LEISURE: text = '空闲'; break;
+          case OccupancyStateType.OCCUPIED: text = '占用';  break;
+          case OccupancyStateType.DISABLED: text = '不可用';  break;
+        }
+      }
+      return this.state.searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
           searchWords={[this.state.searchText]}
@@ -291,7 +299,7 @@ class CarportManagement extends React.Component {
         />
       ) : (
         text
-      ),
+      )},
   });
 
   handleSearch = (selectedKeys: any[], confirm: () => void, dataIndex: string) => {
@@ -339,11 +347,11 @@ class CarportManagement extends React.Component {
   const pageSize = 20;
     return (
       <div className="gutter-example">
-        <BreadcrumbCustom first="用户信息管理" />
+        <BreadcrumbCustom first="车位信息管理" />
         <Row gutter={16}>
           <Col className="gutter-row" md={24}>
             <div className="gutter-box">
-              <Card title="用户信息" bordered={false}>
+              <Card title="车位信息" bordered={false}>
                 <div style={{ marginBottom: 16 }}>
                   <Button
                     type="primary"
@@ -351,7 +359,7 @@ class CarportManagement extends React.Component {
                     disabled={loading}
                     loading={loading}
                   >
-                    Reload
+                    刷新
                                     </Button>
                   <span style={{ marginLeft: 8 }}>
                     {hasSelected
@@ -365,7 +373,7 @@ class CarportManagement extends React.Component {
                   rowSelection={rowSelection as TableRowSelection<any>}
                   columns={columns}
                   dataSource={data}
-                  rowKey={data => data.id}
+                  rowKey={data => data._id}
                   rowClassName={(record: any, index: number) => 'editable-row'}
                   pagination={{pageSize}}
                 />

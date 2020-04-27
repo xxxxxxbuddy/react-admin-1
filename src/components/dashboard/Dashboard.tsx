@@ -1,21 +1,25 @@
 import React from 'react';
-import { Row, Col, Card, Timeline, Icon, message } from 'antd';
+import { Row, Col, Card, message } from 'antd';
 import BreadcrumbCustom from '../BreadcrumbCustom';
-import EchartsViews from './EchartsViews';
-import EchartsProjects from './EchartsProjects';
-import b1 from '../../style/imgs/b1.jpg';
 // @ts-ignore
 import BMap from 'BMap';
-import { getParkingList } from '../../axios';
+import { getParkingList, getParkinglotState } from '../../axios';
+import EchartsArea from '../charts/EchartsArea';
 
-class Dashboard extends React.Component<any, {parkingList: []}> {
+const FreeIcon = 'https://s1.ax1x.com/2020/04/25/JyQPyt.png';
+const BusyIcon = 'https://s1.ax1x.com/2020/04/25/JyQiOP.png';
+const FullIcon = 'https://s1.ax1x.com/2020/04/25/JyQCQI.png';
+const NormalIcon = 'https://s1.ax1x.com/2020/04/20/JM0ABt.png';
+
+class Dashboard extends React.Component<any, {parkingList: [], parkinglotState: [],}> {
   constructor(props: any) {
     super(props);
     this.state = {
       parkingList: [],
+      parkinglotState: [],
     }
   }
-  componentDidMount() {
+  async componentDidMount() {
     const map = new BMap.Map('map');
     this.map = map;
     const initialPoint = new BMap.Point(113.93041, 22.53332);
@@ -39,38 +43,65 @@ class Dashboard extends React.Component<any, {parkingList: []}> {
     //     map.addOverlay(mk);
     //     map.panTo(r.point);
     //   });
-    this.searchParkingLot();
-
+    await this.searchParkingLot();
+    await this.updateParkinglotState();
+    this.addLayout();
   }
   map: any;
 
-  searchParkingLot() {
-    getParkingList().then(res => {
-      this.setState({ parkingList: res.results }, () => this.addLayout());
+  updateParkinglotState = async () => {
+    await getParkinglotState().then(
+      (res: any) => {
+        if (res && res.code === 1) {
+          this.setState({parkinglotState: res.data});
+        } else {
+          message.error('获取停车场状态失败: ' + res.errMsg);
+        }
+      },
+      (err: Error) => {
+        message.error('获取停车场状态失败: ' + err.message);
+      });
+  }
+
+  searchParkingLot = async () => {
+    await getParkingList().then(res => {
+      this.setState({ parkingList: res.results });
     }).catch(e => {
       message.error(e);
     });
   }
 
   addLayout() {
-    const parkingList = this.state.parkingList;
-    const icon = new BMap.Icon('https://s1.ax1x.com/2020/04/20/JM0ABt.png', new BMap.Size(32, 32));
+    const { parkinglotState, parkingList } = this.state;
 
     parkingList.forEach((p: any) => {
       const point = new BMap.Point(p.location.lng, p.location.lat);
+      const state: any = parkinglotState.filter((s: any) => s.name == p.name)[0];
+      let iconUrl = NormalIcon;
+      if (state) {
+        const idleRatio = state.idle_num / state.carport_num;
+        if ( idleRatio > 0.5) {
+          iconUrl = FreeIcon;
+        } else if (idleRatio === 0) {
+          iconUrl = FullIcon;
+        } else {
+          iconUrl = BusyIcon;
+        }
+      }
+      const icon = new BMap.Icon(iconUrl, new BMap.Size(32, 32));
       const marker = new BMap.Marker(point, {icon, title: p.name});
-      marker.addEventListener('click', () => {
-        const infoWindow = new BMap.InfoWindow(`
-          <div>
-            <p>div content</p>
-            <p>div content</p>
-            <p>div content</p>
-          </div>`
-        );
-        this.map.openInfoWindow(infoWindow, point);
-      });
+
+      const infoWindow = new BMap.InfoWindow(state ? `
+        <div style="display: flex;flex-direction: column">
+          <div>停车场：${state.name}</div>
+          <div>车位： <span style="color: green">${state.idle_num}</span> / ${state.carport_num}</div>
+        </div>` : '暂无该停车场数据'
+      );
+      // <div><a href="#/app/carport/management?parkinglot_id=${state.parkinglot_id}">查看详情</a></div>
+      marker.addEventListener('click', () => this.map.openInfoWindow(infoWindow, point));
       this.map.addOverlay(marker);
-    })
+
+    });
   }
 
   render() {
@@ -137,7 +168,8 @@ class Dashboard extends React.Component<any, {parkingList: []}> {
           <Col className="gutter-row" >
             <div className="gutter-box">
               <Card bordered={false} className={'no-padding'}>
-                <EchartsProjects />
+                {/* <EchartsProjects /> */}
+                <EchartsArea />
               </Card>
             </div>
           </Col>

@@ -33,6 +33,9 @@ import MultipleMenu from './extension/MultipleMenu';
 import Sub1 from './smenu/Sub1';
 import Sub2 from './smenu/Sub2';
 import UserManagement from './user/UserManagement';
+import CarportManagement from './carport/CarportManagement';
+import TenantManagement from './tenant/TenantManagement';
+
 
 const WysiwygBundle = Loadable({
     // 按需加载富文本配置
@@ -42,6 +45,8 @@ const WysiwygBundle = Loadable({
 
 export default {
     UserManagement,
+    CarportManagement,
+    TenantManagement,
     BasicForm,
     BasicTable,
     AdvancedTable,
