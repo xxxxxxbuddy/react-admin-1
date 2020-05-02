@@ -35,6 +35,8 @@ import Sub2 from './smenu/Sub2';
 import UserManagement from './user/UserManagement';
 import CarportManagement from './carport/CarportManagement';
 import TenantManagement from './tenant/TenantManagement';
+import AuthorityManagement from './authority/AuthorityManagement';
+import OrderManagement from './order/OrderManagement';
 
 
 const WysiwygBundle = Loadable({
@@ -47,13 +49,15 @@ export default {
     UserManagement,
     CarportManagement,
     TenantManagement,
-    BasicForm,
-    BasicTable,
-    AdvancedTable,
-    SearchTable,
-    AsynchronousTable,
-    Echarts,
-    Recharts,
+    AuthorityManagement,
+    OrderManagement,
+    // BasicForm,
+    // BasicTable,
+    // AdvancedTable,
+    // SearchTable,
+    // AsynchronousTable,
+    // Echarts,
+    // Recharts,
     Icons,
     Buttons,
     Spins,
@@ -64,16 +68,16 @@ export default {
     Drags,
     Dashboard,
     Gallery,
-    BasicAnimations,
-    ExampleAnimations,
-    AuthBasic,
-    RouterEnter,
-    WysiwygBundle,
-    Cssmodule,
-    MapUi,
-    QueryParams,
-    Visitor,
-    MultipleMenu,
-    Sub1,
-    Sub2,
+    // BasicAnimations,
+    // ExampleAnimations,
+    // AuthBasic,
+    // RouterEnter,
+    // WysiwygBundle,
+    // Cssmodule,
+    // MapUi,
+    // QueryParams,
+    // Visitor,
+    // MultipleMenu,
+    // Sub1,
+    // Sub2,
 } as any;

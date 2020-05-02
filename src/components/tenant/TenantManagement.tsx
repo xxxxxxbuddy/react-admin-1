@@ -2,7 +2,7 @@ import React from "react";
 import BreadcrumbCustom from "../BreadcrumbCustom";
 import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon } from "antd";
 import { TableRowSelection } from "antd/lib/table";
-import { updateTenantInfo, getTenantInfo } from "../../axios";
+import { updateTenantInfo, getTenantInfo, deleteTenant } from "../../axios";
 import Highlighter from 'react-highlight-words';
 
 const FormItem = Form.Item;
@@ -259,6 +259,21 @@ class TenantManagement extends React.Component {
     this.setState({ searchText: '' });
   };
 
+  delete = async() => {
+    const data: string[] = this.state.selectedRowKeys;
+    await deleteTenant(data).then(async ({code}: {code: number}) => {
+      if (code === 1) {
+        this.setState({ selectedRowKeys: [] });
+        await this.start();
+        message.success('删除成功');
+      } else {
+        message.error('删除失败');
+      }
+    }).catch(e => {
+      message.error('删除失败,' + e.message);
+    });
+  }
+
   render() {
     const { loading, selectedRowKeys, data } = this.state;
     const rowSelection = {
@@ -291,11 +306,11 @@ class TenantManagement extends React.Component {
   const pageSize = 20;
     return (
       <div className="gutter-example">
-        <BreadcrumbCustom first="用户信息管理" />
+        <BreadcrumbCustom first="租户信息管理" />
         <Row gutter={16}>
           <Col className="gutter-row" md={24}>
             <div className="gutter-box">
-              <Card title="用户信息" bordered={false}>
+              <Card title="租户信息" bordered={false}>
                 <div style={{ marginBottom: 16 }}>
                   <Button
                     type="primary"
@@ -307,9 +322,18 @@ class TenantManagement extends React.Component {
                                     </Button>
                   <span style={{ marginLeft: 8 }}>
                     {hasSelected
-                      ? `Selected ${selectedRowKeys.length} items`
+                      ? `选中 ${selectedRowKeys.length} 项`
                       : ''}
                   </span>
+                  <Button
+                    type="danger"
+                    onClick={this.delete}
+                    disabled={loading || selectedRowKeys.length === 0}
+                    loading={loading}
+                    style={{float: "right", marginRight: "40px"}}
+                  >
+                    删除选中
+                  </Button>
                 </div>
                 <Table
                   components={components}

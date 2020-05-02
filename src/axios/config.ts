@@ -35,17 +35,32 @@ export const CAR = {
 export const CARPORT = {
     INFO: PREFIX + '/carport/get',
     UPDATE: PREFIX + '/carport/update',
+    DELETE: PREFIX + '/carport/delete',
     PARKINGLOT_STATE: PREFIX + '/carport/parkinglot_state',
 }
 
 export const PARKINGLOT = {
     INFO: PREFIX + '/parkinglot/get',
-    UPDATE: PREFIX + '/carport/parkinglot',
+    UPDATE: PREFIX + '/parkinglot/update',
+    DELETE: PREFIX + '/parkinglot/delete',
+}
+
+export const AUTHORITY = {
+    INFO: PREFIX + '/authority/get',
+    UPDATE: PREFIX + '/authority/update',
+    ADD: PREFIX + '/authority/add',
 }
 
 export const TENANT = {
     INFO: PREFIX + '/tenant/get',
     UPDATE: PREFIX + '/tenant/update',
+    DELETE: PREFIX + '/tenant/delete',
+}
+
+export const ORDER = {
+    INFO: PREFIX + '/order/get',
+    UPDATE: PREFIX + '/tenant/update',
+    DELETE: PREFIX + '/order/delete',
 }
 
 export const LOGIN = PREFIX + '/login';

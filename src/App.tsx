@@ -7,7 +7,7 @@ import { Layout, notification, Icon } from 'antd';
 import { ThemePicker } from './components/widget';
 import { connectAlita } from 'redux-alita';
 import { checkLogin } from './utils';
-import { fetchMenu } from './axios';
+import { fetchTenantMenu, fetchAdminMenu } from './axios';
 import umbrella from 'umbrella-storage';
 
 const { Content, Footer } = Layout;
@@ -39,6 +39,12 @@ class App extends Component<AppProps> {
         this.fetchSmenu();
     }
 
+    // componentWillReceiveProps(nextProps: AppProps) {
+    //     if (nextProps.auth && nextProps.auth !== this.props.auth) {
+    //         this.fetchSmenu();
+    //     }
+    // }
+
     openFNotification = () => {
 
     };
@@ -49,11 +55,18 @@ class App extends Component<AppProps> {
         const setAlitaMenu = (menus: any) => {
             this.props.setAlitaState({ stateName: 'smenus', data: menus });
         };
-        setAlitaMenu(umbrella.getLocalStorage('smenus') || []);
-        fetchMenu().then(smenus => {
-            setAlitaMenu(smenus);
-            umbrella.setLocalStorage('smenus', smenus);
-        });
+        const role = this.props.auth && this.props.auth.data.role;
+        if (role === '系统管理员') {
+            fetchAdminMenu().then(smenus => {
+                setAlitaMenu(smenus);
+                umbrella.setLocalStorage('smenus', smenus);
+            });
+        } else {
+            fetchTenantMenu().then(smenus => {
+                setAlitaMenu(smenus);
+                umbrella.setLocalStorage('smenus', smenus);
+            });
+        }
     };
 
     getClientWidth = () => {
@@ -78,7 +91,7 @@ class App extends Component<AppProps> {
                     {!responsive.data.isMobile && checkLogin(auth.data.permissions) && (
                         <SiderCustom collapsed={this.state.collapsed} />
                     )}
-                    <ThemePicker />
+                    {/* <ThemePicker /> */}
                     <Layout style={{ flexDirection: 'column' }}>
                         <HeaderCustom
                             toggle={this.toggle}

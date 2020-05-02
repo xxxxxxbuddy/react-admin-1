@@ -50,8 +50,10 @@ class Login extends React.Component<LoginProps> {
                         console.error(res.errMsg);
                     }
                 }, e => {
+                    console.error(e);
                     message.error('登录失败');
                 }).catch(e => {
+                    console.error(e);
                     message.error('登录失败');
                 });
             }

@@ -2,7 +2,7 @@ import React from "react";
 import BreadcrumbCustom from "../BreadcrumbCustom";
 import { Row, Col, Card, Button, Table, Form, Popconfirm, InputNumber, Input, message, Icon } from "antd";
 import { TableRowSelection } from "antd/lib/table";
-import { getCarportInfo, updateCarportInfo, getParkinglotInfo } from "../../axios";
+import { getCarportInfo, updateCarportInfo, getParkinglotInfo, deleteCarport } from "../../axios";
 import Highlighter from 'react-highlight-words';
 
 const FormItem = Form.Item;
@@ -99,6 +99,7 @@ class CarportManagement extends React.Component {
       {
           title: '占用状态',
           dataIndex: 'occupancy_state',
+          editable: true,
           ...this.getColumnSearchProps('occupancy_state'),
           // width: 200,
       },
@@ -315,6 +316,21 @@ class CarportManagement extends React.Component {
     this.setState({ searchText: '' });
   };
 
+  delete = async() => {
+    const data: string[] = this.state.selectedRowKeys;
+    await deleteCarport(data).then(async ({code}: {code: number}) => {
+      if (code === 1) {
+        this.setState({ selectedRowKeys: [] });
+        await this.start();
+        message.success('删除成功');
+      } else {
+        message.error('删除失败');
+      }
+    }).catch(e => {
+      message.error('删除失败,' + e.message);
+    });
+  }
+
   render() {
     const { loading, selectedRowKeys, data } = this.state;
     const rowSelection = {
@@ -363,9 +379,18 @@ class CarportManagement extends React.Component {
                                     </Button>
                   <span style={{ marginLeft: 8 }}>
                     {hasSelected
-                      ? `Selected ${selectedRowKeys.length} items`
+                      ? `选中 ${selectedRowKeys.length} 项`
                       : ''}
                   </span>
+                  <Button
+                    type="danger"
+                    onClick={this.delete}
+                    disabled={loading || selectedRowKeys.length === 0}
+                    loading={loading}
+                    style={{float: "right", marginRight: "40px"}}
+                  >
+                    删除选中
+                  </Button>
                 </div>
                 <Table
                   components={components}

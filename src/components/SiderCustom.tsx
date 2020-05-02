@@ -96,7 +96,7 @@ class SiderCustom extends Component<SiderCustomProps, SiderCustomState> {
             >
                 <div className="logo" >共享停车位信息管理系统</div>
                 <SiderMenu
-                    menus={[...routes.menus, ...smenus.data]}
+                    menus={[...smenus.data]}
                     onClick={this.menuClick}
                     mode="inline"
                     selectedKeys={[selectedKey]}

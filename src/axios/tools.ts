@@ -6,10 +6,10 @@ import axios from 'axios';
 import { message } from 'antd';
 
 interface IFRequestParam {
-    url: string;
-    msg?: string;
-    config?: any;
-    data?: any;
+  url: string;
+  msg?: string;
+  config?: any;
+  data?: any;
 }
 /**
  * 公用get请求
@@ -18,13 +18,13 @@ interface IFRequestParam {
  * @param headers   接口所需header配置
  */
 export const get = ({ url, msg = '接口异常', config }: IFRequestParam) =>
-    axios
-        .get(url, config)
-        .then(res => res.data)
-        .catch(err => {
-            console.log(err);
-            message.warn(msg);
-        });
+  axios
+    .get(url, config)
+    .then(res => res.data)
+    .catch(err => {
+      console.log(err);
+      message.warn(msg);
+    });
 
 /**
  * 公用post请求
@@ -34,20 +34,29 @@ export const get = ({ url, msg = '接口异常', config }: IFRequestParam) =>
  * @param headers   接口所需header配置
  */
 export const post = ({ url, data, msg = '接口异常', config }: IFRequestParam) =>
-    axios
-        .post(url, data, config)
-        .then(res => res.data)
-        .catch(err => {
-            console.log(err);
-            message.warn(msg);
-        });
+  axios
+    .post(url, data, config)
+    .then(res => res.data)
+    .catch(err => {
+      console.log(err);
+      message.warn(msg);
+    });
 
 
 export const del = ({ url, data, msg = '接口异常' }: IFRequestParam) =>
-    axios
-        .delete(url, {data: data})
-        .then(res => res.data)
-        .catch(err => {
-            console.log(err);
-            message.warn(msg);
-});
+  axios
+    .delete(url, { data: data })
+    .then(res => res.data)
+    .catch(err => {
+      console.log(err);
+      message.warn(msg);
+    });
+
+export const put = ({ url, data, msg = '接口异常', config }: IFRequestParam) =>
+  axios
+    .post(url, data, config)
+    .then(res => res.data)
+    .catch(err => {
+      console.log(err);
+      message.warn(msg);
+    });
